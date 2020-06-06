@@ -3,15 +3,24 @@ const Bootcamp = require("../models/Bootcamps");
 
 exports.getBootcamps = async (req, res, next) => {
   try {
-    const bootcamps = await Bootcamp.find();
+    let query;
+
+    let queryStr = JSON.stringify(req.query);
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in)\b/g,
+      (match) => `$${match}`
+    );
+    //console.log(queryStr);
+    query = Bootcamp.find(JSON.parse(queryStr))
+    const bootcamps = await query;
     res.status(200).json({
       success: true,
       count: bootcamps.length,
-      data: bootcamps
+      data: bootcamps,
     });
   } catch (error) {
     res.status(400).json({
-      success: false
+      success: false,
     });
   }
 };
@@ -34,7 +43,7 @@ exports.getOneBootcamp = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: bootcamp
+      data: bootcamp,
     });
   } catch (error) {
     next(new ErrorResponse(`Bootcamp with id ${req.params.id} not found`, 404));
@@ -50,11 +59,11 @@ exports.createBootcamp = async (req, res) => {
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).json({
       success: true,
-      data: bootcamp
+      data: bootcamp,
     });
   } catch (error) {
     res.status(404).json({
-      success: false
+      success: false,
       //message: `Error: ${error}`
     });
   }
@@ -65,25 +74,25 @@ exports.updateBootcamp = async (req, res, next) => {
     const id = req.params.id;
     const bootcamp = await Bootcamp.findByIdAndUpdate(id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
     if (!bootcamp) {
       return res.status(400).json({
         success: false,
-        msg: "Update failed"
+        msg: "Update failed",
       });
     }
 
     res.status(200).json({
       success: true,
       msg: `Document was successfully updated ${id}`,
-      data: bootcamp
+      data: bootcamp,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      msg: `ERROR: ${error}`
+      msg: `ERROR: ${error}`,
     });
   }
 };
@@ -96,19 +105,19 @@ exports.deleteBootcamp = async (req, res) => {
     if (!bootcamp) {
       return res.status(400).json({
         success: false,
-        msg: "Cannot delete"
+        msg: "Cannot delete",
       });
     }
 
     res.status(200).json({
       success: true,
       msg: `Delete successfull: ${id}`,
-      data: {}
+      data: {},
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      msg: `ERROR: ${error}`
+      msg: `ERROR: ${error}`,
     });
   }
 };
