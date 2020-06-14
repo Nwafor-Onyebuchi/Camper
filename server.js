@@ -2,8 +2,10 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const errorHandler = require('./middleware/errors')
-const bootcapms = require("./routes/bootcamps");
+const bootcamps = require("./routes/bootcamps");
 const connectDB = require("./config/db");
+const courses = require("./routes/courses");
+
 
 dotenv.config({ path: "./config/config.env" });
 
@@ -19,7 +21,8 @@ connectDB();
 
 app.use(morgan("dev"));
 
-app.use("/api/v1/bootcamps", bootcapms);
+app.use("/api/v1/bootcamps", bootcamps);
+app.use("/api/v1/courses", courses);
 
 app.use(errorHandler)
 
