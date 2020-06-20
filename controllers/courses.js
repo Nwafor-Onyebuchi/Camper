@@ -75,3 +75,50 @@ exports.addCourse = async (req, res, next) => {
         data: course
     })
 }
+
+// @desc Update a single course
+// @route PUT /api/courses/:id
+// @access Private
+
+exports.updateCourse = async (req, res, next) => {
+    const id = req.params.id
+
+    let course = await Course.findById(id)
+    if (!course) {
+        return next(
+          new ErrorResponse(`Course with id ${id} not found`, 404)
+        );
+    }
+
+    course = await Course.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true
+    })
+    
+    res.status(200).json({
+        success: true,
+        data: course
+    })
+}
+
+// @desc Delete a single course
+// @route DELETE /api/courses/:id
+// @access Private
+
+exports.deleteCourse = async (req, res, next) => {
+    const id = req.params.id
+
+    const course = await Course.findById(id)
+    if (!course) {
+        return next(
+          new ErrorResponse(`Course with id ${id} not found`, 404)
+        );
+    }
+
+   course.remove()
+    
+    res.status(200).json({
+        success: true,
+        data: {}
+    })
+}
