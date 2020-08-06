@@ -5,13 +5,13 @@ exports.getBootcamps = async (req, res, next) => {
   try {
     let query;
     // Make a copy of req query
-    const reqQuery = {...req.query}
+    const reqQuery = { ...req.query };
 
     //Fields to exclude
-    const fieldsToRemove = ['select', 'sort', 'page', 'limit'];
+    const fieldsToRemove = ["select", "sort", "page", "limit"];
 
     // Loop over all fields and delete fieldsToRemove
-    fieldsToRemove.forEach(param=>delete reqQuery[param])
+    fieldsToRemove.forEach((param) => delete reqQuery[param]);
 
     // Create query string
     let queryStr = JSON.stringify(reqQuery);
@@ -21,53 +21,52 @@ exports.getBootcamps = async (req, res, next) => {
       /\b(gt|gte|lt|lte|in)\b/g,
       (match) => `$${match}`
     );
-    
+
     // Find resources
-    query = Bootcamp.find(JSON.parse(queryStr)).populate('courses')
-    
+    query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
+
     // Select fields
-    if(req.query.select){
-      const fields = req.query.select.split(',').join(' ')
-      query = query.select(fields)
+    if (req.query.select) {
+      const fields = req.query.select.split(",").join(" ");
+      query = query.select(fields);
     }
 
     // Sort fields
-    if(req.query.sort){
-      const sortBy = req.query.sort.split(',').join(' ')
-      query = query.sort(sortBy)
-    } else{
-      query = query.sort('createdAt')
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("createdAt");
     }
 
     //Pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 2;
-    const startIndex = (page - 1) * limit
-    const endIndex = page * limit
-    const total = await Bootcamp.countDocuments()
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await Bootcamp.countDocuments();
 
-    query = query.skip(startIndex).limit(limit)
+    query = query.skip(startIndex).limit(limit);
     // Execute query
-    
+
     const bootcamps = await query;
 
     //Pagination result
-    const pagination = {}
+    const pagination = {};
 
-    if(endIndex < total) {
+    if (endIndex < total) {
       pagination.next = {
         page: page + 1,
-        limit
-      }
+        limit,
+      };
     }
 
-    if(startIndex > 0) {
+    if (startIndex > 0) {
       pagination.prev = {
         page: page - 1,
-        limit
-      }
+        limit,
+      };
     }
-
 
     res.status(200).json({
       success: true,
@@ -166,13 +165,41 @@ exports.deleteBootcamp = async (req, res) => {
       });
     }
 
-    bootcamp.remove()
-    
+    bootcamp.remove();
+
     res.status(200).json({
       success: true,
       msg: `Delete successfull: ${id}`,
       data: {},
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      msg: `ERROR: ${error}`,
+    });
+  }
+};
+
+exports.bootcampPhotoUpload = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const bootcamp = await Bootcamp.findById(id);
+
+    if (!bootcamp) {
+      return res.status(400).json({
+        success: false,
+        msg: "Error uploading file",
+      });
+    }
+
+    if (!req.files) {
+      return next(new ErrorResponse("Please upload a photo", 400));
+    }
+    const file = req.files.file;
+    if (!file.mimetype.startsWith("image")) {
+      return next(new ErrorResponse("Please upload an image file", 400));
+    }
+    //console.log(req.files)
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -5,6 +5,7 @@ const errorHandler = require('./middleware/errors')
 const bootcamps = require("./routes/bootcamps");
 const connectDB = require("./config/db");
 const courses = require("./routes/courses");
+const fileupload = require('express-fileupload')
 
 
 dotenv.config({ path: "./config/config.env" });
@@ -21,12 +22,14 @@ connectDB();
 
 app.use(morgan("dev"));
 
+app.use(fileupload())
+
 app.use("/api/v1/bootcamps", bootcamps);
 app.use("/api/v1/courses", courses);
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const server = app.listen(
   PORT,()=>{
