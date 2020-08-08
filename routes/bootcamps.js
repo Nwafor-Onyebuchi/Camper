@@ -8,19 +8,22 @@ const {
   createBootcamp,
   updateBootcamp,
   deleteBootcamp,
-  bootcampPhotoUpload
+  bootcampPhotoUpload,
 } = require("../controllers/bootcamp");
 
+const Bootcamp = require("../models/Bootcamps");
+const advancedResults = require("../middleware/advancedResults");
+
 // Include other resource routers
-const courseRouter = require('./courses')
+const courseRouter = require("./courses");
 
 // Re-route into other resourse routes
-router.use('/:bootcampId/courses', courseRouter)
-router.route('/:id/photo').put(bootcampPhotoUpload)
+router.use("/:bootcampId/courses", courseRouter);
+router.route("/:id/photo").put(bootcampPhotoUpload);
 
 router
   .route("/")
-  .get(getBootcamps)
+  .get(advancedResults(Bootcamp, "courses"), getBootcamps)
   .post(createBootcamp);
 
 router
