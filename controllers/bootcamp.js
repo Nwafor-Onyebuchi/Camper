@@ -1,3 +1,4 @@
+const path = require("path");
 const ErrorResponse = require("../utils/ErrorResponse");
 const Bootcamp = require("../models/Bootcamps");
 
@@ -123,13 +124,36 @@ exports.bootcampPhotoUpload = async (req, res, next) => {
     }
 
     if (!req.files) {
-      return next(new ErrorResponse("Please upload a photo", 400));
+      return next(new ErrorResponse("Please select a photo", 400));
     }
     const file = req.files.file;
     if (!file.mimetype.startsWith("image")) {
       return next(new ErrorResponse("Please upload an image file", 400));
     }
-    //console.log(req.files)
+
+    if (req.files.size > process.env.MAX_FILE_UPLOAD_SIZE) {
+      return next(
+        new ErrorResponse(
+          "File size limit exceeded. File size limit is 1MB",
+          400
+        )
+      );
+    }
+
+    // Create custom file name
+    file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`;
+
+    file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
+      if (err) {
+        console.log(err);
+        return next(new ErrorResponse("Error uploading file", 500));
+      }
+      await Bootcamp.findByIdAndDelete(id, { photo: file.name });
+      res.status(200).json({
+        success: true,
+        data: file.name,
+      });
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
