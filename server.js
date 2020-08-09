@@ -7,13 +7,18 @@ const bootcamps = require("./routes/bootcamps");
 const connectDB = require("./config/db");
 const courses = require("./routes/courses");
 const fileupload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 const auth = require("./routes/auth");
 
 dotenv.config({ path: "./config/config.env" });
 
 const app = express();
 
+// Body parser
 app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
