@@ -7,6 +7,7 @@ const bootcamps = require("./routes/bootcamps");
 const connectDB = require("./config/db");
 const courses = require("./routes/courses");
 const fileupload = require("express-fileupload");
+const auth = require("./routes/auth");
 
 dotenv.config({ path: "./config/config.env" });
 
@@ -28,8 +29,10 @@ app.use(fileupload());
 // set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
+// Mount routes
 app.use("/api/v1/bootcamps", bootcamps);
 app.use("/api/v1/courses", courses);
+app.use("/api/v1/auth", auth);
 
 app.use(errorHandler);
 
