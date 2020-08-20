@@ -43,6 +43,7 @@ exports.getOneBootcamp = async (req, res, next) => {
 
 exports.createBootcamp = async (req, res) => {
   try {
+    req.body.user = req.user.id;
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).json({
       success: true,

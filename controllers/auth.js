@@ -79,6 +79,7 @@ const senTokenResponse = (user, statusCode, res) => {
 
 // Get logged in user
 exports.getMe = async (req, res, next) => {
+  // console.log(req.user.id);
   const user = await User.findById(req.user.id);
   res.status(200).json({
     success: true,
