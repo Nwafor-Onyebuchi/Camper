@@ -1,6 +1,7 @@
 const path = require("path");
 const ErrorResponse = require("../utils/ErrorResponse");
 const Bootcamp = require("../models/Bootcamps");
+const { findByIdAndUpdate } = require("../models/Bootcamps");
 
 exports.getBootcamps = async (req, res, next) => {
   try {
@@ -75,10 +76,7 @@ exports.createBootcamp = async (req, res, next) => {
 exports.updateBootcamp = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const bootcamp = await Bootcamp.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    let bootcamp = await Bootcamp.findById(id);
 
     if (!bootcamp) {
       return res.status(400).json({
@@ -86,6 +84,21 @@ exports.updateBootcamp = async (req, res, next) => {
         msg: "Update failed",
       });
     }
+
+    // Make sure logged in user is the owner of bootcamp
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return next(
+        new ErrorResponse(
+          `User with ID ${req.user.id} is not authorised to update this bootcamp`,
+          401
+        )
+      );
+    }
+
+    bootcamp = await Bootcamp.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       success: true,
@@ -100,7 +113,7 @@ exports.updateBootcamp = async (req, res, next) => {
   }
 };
 
-exports.deleteBootcamp = async (req, res) => {
+exports.deleteBootcamp = async (req, res, next) => {
   try {
     const id = req.params.id;
     const bootcamp = await Bootcamp.findById(id);
@@ -110,6 +123,16 @@ exports.deleteBootcamp = async (req, res) => {
         success: false,
         msg: "Cannot delete",
       });
+    }
+
+    // Make sure logged in user is the owner of bootcamp
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return next(
+        new ErrorResponse(
+          `User with ID ${req.user.id} is not authorised to delete this bootcamp`,
+          401
+        )
+      );
     }
 
     bootcamp.remove();
@@ -137,6 +160,16 @@ exports.bootcampPhotoUpload = async (req, res, next) => {
         success: false,
         msg: "Error uploading file",
       });
+    }
+
+    // Make sure logged in user is the owner of bootcamp
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+      return next(
+        new ErrorResponse(
+          `User with ID ${req.user.id} is not authorised to delete this bootcamp`,
+          401
+        )
+      );
     }
 
     if (!req.files) {
