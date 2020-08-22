@@ -41,9 +41,22 @@ exports.getOneBootcamp = async (req, res, next) => {
   }
 };
 
-exports.createBootcamp = async (req, res) => {
+exports.createBootcamp = async (req, res, next) => {
   try {
+    //Add a user to bootcamp
     req.body.user = req.user.id;
+
+    // check for created bootcamps
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
+    if (publishedBootcamp && req.user.role !== "admin") {
+      return next(
+        new ErrorResponse(
+          `The user with ID ${req.user.id} has already published a bootcamp`,
+          401
+        )
+      );
+    }
+
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).json({
       success: true,
