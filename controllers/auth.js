@@ -88,3 +88,28 @@ exports.getMe = async (req, res, next) => {
 
   // next();
 };
+
+// Get logged in user
+exports.forgotPassword = async (req, res, next) => {
+  // console.log(req.user.id);
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    return next(
+      new ErrorResponse(
+        `${req.body.email} has not been registered on the platform`,
+        404
+      )
+    );
+  }
+
+  // Get reset token
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+
+  // next();
+};
